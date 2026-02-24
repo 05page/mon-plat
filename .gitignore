@@ -1,0 +1,33 @@
+# Dependencies
+node_modules/
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# Expo
+mon-plat/.expo/
+mon-plat/dist/
+
+# Build outputs
+backend/dist/
+
+# Prisma generated
+backend/node_modules/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+
+# IDE
+.vscode/
+.idea/
+
+# Claude (private instructions)
+CLAUDE.md
+.claude/
