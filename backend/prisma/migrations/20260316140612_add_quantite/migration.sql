@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Post" ADD COLUMN     "quantie" INTEGER NOT NULL DEFAULT 0;

@@ -31,6 +31,7 @@ model User {
 
   posts      Post[]      // produits créés (SELLER)
   orders     Order[]     // commandes passées (CLIENT)
+  wallet Wallet?
 }
 
 enum Type {
@@ -45,6 +46,7 @@ model Post {
   content   String?
   price     Float
   image     String?
+  quantie Int @default(0)
   published Boolean  @default(false)
   author    User     @relation(fields: [authorId], references: [id])
   authorId  Int
@@ -82,6 +84,9 @@ model OrderItem {
   orderId Int
   post    Post  @relation(fields: [postId], references: [id])
   postId  Int
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+
 }
 
 enum PaymentStatus {
@@ -101,4 +106,33 @@ model Payment {
 
   order   Order @relation(fields: [orderId], references: [id])
   orderId Int   @unique // un paiement par commande
+
 }
+
+enum TransactionType {
+  CREDIT
+  DEBIT
+}
+
+model Wallet {
+  id Int @id @default(autoincrement())
+  userId Int @unique
+  user User @relation(fields: [userId], references: [id]) 
+  balance Float @default(0.0)
+  pin String
+  pinAttemps Int @default(0)
+  blockedUntil DateTime?
+  createdAt DateTime  @default(now())
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id Int @id @default(autoincrement())
+  amount Float
+  type TransactionType
+  walletId Int
+  wallet   Wallet @relation(fields: [walletId], references: [id])
+  createdAt DateTime @default(now())
+}
+
