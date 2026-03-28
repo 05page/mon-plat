@@ -9,6 +9,10 @@ var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 var authRouter = require('./src/auth/auth').default;
 var meRouter = require('./src/auth/me').default;
+var foodsRouter = require('./src/foods/foods').default;
+var ordersRouter= require('./src/foods/commande').default;
+var walleRouter = require('./src/wallet/wallet').default;
+var { setupSwagger } = require('./src/swagger');
 
 var app = express();
 
@@ -26,6 +30,12 @@ app.use('/', indexRouter);
 app.use('/users', usersRouter);
 app.use('/auth', authRouter);
 app.use('/', meRouter);
+app.use('/foods', foodsRouter);
+app.use('/orders', ordersRouter);
+app.use('/wallet', walleRouter);
+
+// Documentation Swagger — accessible sur /api-docs
+setupSwagger(app);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
