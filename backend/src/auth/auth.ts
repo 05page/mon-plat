@@ -5,7 +5,39 @@ import { prisma } from '../db/client'
 
 const router = Router()
 
-// POST /auth/register
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     summary: Créer un compte utilisateur
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: jean@example.com
+ *               password:
+ *                 type: string
+ *                 example: motdepasse123
+ *               fullname:
+ *                 type: string
+ *                 example: Jean David
+ *               role:
+ *                 type: string
+ *                 enum: [CLIENT, SELLER]
+ *                 example: CLIENT
+ *     responses:
+ *       201:
+ *         description: Compte créé, OTP retourné (temporaire)
+ *       400:
+ *         description: Champs manquants ou email déjà utilisé
+ */
 router.post('/register', async (req: Request, res: Response) => {
   try {
     const { email, fullname, role, password } = req.body
@@ -58,7 +90,34 @@ router.post('/register', async (req: Request, res: Response) => {
   }
 })
 
-// POST /auth/verify-email
+/**
+ * @swagger
+ * /auth/verify-email:
+ *   post:
+ *     summary: Vérifier l'email avec le code OTP
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, code_otp]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: jean@example.com
+ *               code_otp:
+ *                 type: integer
+ *                 example: 482910
+ *     responses:
+ *       200:
+ *         description: Email vérifié avec succès
+ *       400:
+ *         description: Code OTP invalide ou email déjà vérifié
+ *       404:
+ *         description: Utilisateur non trouvé
+ */
 router.post('/verify-email', async (req: Request, res: Response) => {
   try {
     const { email, code_otp } = req.body
@@ -100,7 +159,34 @@ router.post('/verify-email', async (req: Request, res: Response) => {
   }
 })
 
-// POST /auth/login
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     summary: Se connecter et récupérer un token JWT
+ *     tags: [Auth]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: jean@example.com
+ *               password:
+ *                 type: string
+ *                 example: motdepasse123
+ *     responses:
+ *       200:
+ *         description: Connexion réussie, token JWT retourné
+ *       401:
+ *         description: Email ou mot de passe incorrect
+ *       403:
+ *         description: Email non vérifié
+ */
 router.post('/login', async (req: Request, res: Response) => {
   try {
     const { email, password } = req.body
@@ -146,5 +232,6 @@ router.post('/login', async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Erreur serveur' })
   }
 })
+
 
 export default router

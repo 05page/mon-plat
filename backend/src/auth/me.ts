@@ -4,7 +4,22 @@ import { authMiddleware, AuthRequest } from '../middleware/auth'
 
 const router = Router()
 
-// GET /me
+/**
+ * @swagger
+ * /me:
+ *   get:
+ *     summary: Récupérer le profil de l'utilisateur connecté
+ *     tags: [Profil]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Données du profil
+ *       401:
+ *         description: Token manquant ou invalide
+ *       404:
+ *         description: Utilisateur non trouvé
+ */
 router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
     const user = await prisma.user.findUnique({
@@ -31,7 +46,36 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   }
 })
 
-//PUT /updateProfil
+/**
+ * @swagger
+ * /updateProfil:
+ *   put:
+ *     summary: Mettre à jour le profil (email et nom)
+ *     tags: [Profil]
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, fullname]
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 example: nouveau@example.com
+ *               fullname:
+ *                 type: string
+ *                 example: Jean David Kouassi
+ *     responses:
+ *       200:
+ *         description: Profil mis à jour
+ *       400:
+ *         description: Champs manquants ou email déjà utilisé
+ *       401:
+ *         description: Token manquant ou invalide
+ */
 router.put('/updateProfil', authMiddleware, async (req:AuthRequest, res:Response) => {
     try{
         const {email, fullname} = req.body
@@ -64,7 +108,20 @@ router.put('/updateProfil', authMiddleware, async (req:AuthRequest, res:Response
     }
 });
 
-//POST /logout
+/**
+ * @swagger
+ * /logout:
+ *   post:
+ *     summary: Se déconnecter (invalide le token JWT)
+ *     tags: [Profil]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Déconnexion réussie
+ *       401:
+ *         description: Token manquant ou invalide
+ */
 export const blacklist = new Set()
 router.post('/logout', authMiddleware, async(req:AuthRequest, res:Response) => {
   try{
