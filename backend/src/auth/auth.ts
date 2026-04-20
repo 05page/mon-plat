@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express'
 import bcrypt from 'bcrypt'
 import jwt from 'jsonwebtoken'
 import { prisma } from '../db/client'
+import { json } from 'node:stream/consumers'
 
 const router = Router()
 
@@ -40,7 +41,7 @@ const router = Router()
  */
 router.post('/register', async (req: Request, res: Response) => {
   try {
-    const { email, fullname, role, password } = req.body
+    const { email, fullname, role, telephone, password, verify_password } = req.body
 
     // Validation des champs requis
     if (!email || !password) {
@@ -50,6 +51,17 @@ router.post('/register', async (req: Request, res: Response) => {
 
     if (role && role !== 'CLIENT' && role !== 'SELLER') {
       res.status(400).json({ error: 'Le rôle doit être CLIENT ou SELLER' })
+      return
+    }
+
+    // Numéro ivoirien : optionnellement +225 ou 00225, suivi de 10 chiffres
+    if (telephone && !/^(\+225|00225)?\d{10}$/.test(telephone)) {
+      res.status(400).json({ error: 'Numéro de téléphone invalide (ex: +2250712345678)' })
+      return
+    }
+
+    if (verify_password !== password) {
+      res.status(400).json({ error: "Les mots de passes ne correspondent pas" })
       return
     }
 
@@ -72,6 +84,7 @@ router.post('/register', async (req: Request, res: Response) => {
         email,
         fullname,
         role,
+        telephone,
         password: hashedPassword,
         code_otp,
       },
@@ -124,6 +137,12 @@ router.post('/verify-email', async (req: Request, res: Response) => {
 
     if (!email || !code_otp) {
       res.status(400).json({ error: 'Email et code OTP sont requis' })
+      return
+    }
+
+    // Le code OTP doit être exactement 6 chiffres
+    if (!/^\d{6}$/.test(String(code_otp))) {
+      res.status(400).json({ error: 'Le code OTP doit contenir exactement 6 chiffres' })
       return
     }
 

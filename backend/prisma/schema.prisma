@@ -24,6 +24,7 @@ model User {
   fullname     String?
   role         Role      @default(CLIENT)
   password     String
+  telephone    String
   code_otp     Int?
   email_verify DateTime?
   created_at   DateTime  @default(now())
