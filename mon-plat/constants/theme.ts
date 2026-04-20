@@ -10,20 +10,20 @@ const tintColorDark = '#fff';
 
 export const Colors = {
   light: {
-    text: '#11181C',
+    text: '#1a1a1a',
     background: '#fff',
-    tint: tintColorLight,
+    primary: '#FF6B00',
+    subtitle: '#687076',
+    surface: '#F5F5F5',
     icon: '#687076',
-    tabIconDefault: '#687076',
-    tabIconSelected: tintColorLight,
   },
   dark: {
     text: '#ECEDEE',
     background: '#151718',
-    tint: tintColorDark,
+    primary: '#FF6B00',    // l'orange reste pareil
+    subtitle: '#9BA1A6',
+    surface: '#1E2022',
     icon: '#9BA1A6',
-    tabIconDefault: '#9BA1A6',
-    tabIconSelected: tintColorDark,
   },
 };
 
