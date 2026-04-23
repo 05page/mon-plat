@@ -40,9 +40,8 @@ export default function Login() {
                 {/* Zone branding */}
                 <View style={styles.brandingBlock}>
                     <View style={styles.logoCircle}>
-                        <Text style={styles.logoText}>MP</Text>
+                        <Image style={styles.img} source={require('../../assets/images/bg.png')} />
                     </View>
-                    <Text style={styles.appName}>mon-plat</Text>
                     <Text style={styles.tagline}>La food de chez nous, livrée chez toi</Text>
                 </View>
 
@@ -107,6 +106,11 @@ const styles = StyleSheet.create({
         justifyContent: 'center',
     },
 
+    img:{
+        width: 35,
+        height: 35
+    },
+
     brandingBlock: {
         alignItems: 'center',
         marginBottom: 48,
@@ -133,13 +137,6 @@ const styles = StyleSheet.create({
         fontSize: 28,
         fontWeight: 'bold',
         letterSpacing: 1,
-    },
-
-    appName: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: '#1a1a1a',
-        marginBottom: 6,
     },
 
     tagline: {

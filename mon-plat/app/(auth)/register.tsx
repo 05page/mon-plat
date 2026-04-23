@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, ScrollView, Image } from 'react-native'
 import { RegisterForm } from '@/types/auth'
 import { Button, TextInput, SegmentedButtons } from 'react-native-paper'
 import Toast from 'react-native-toast-message'
@@ -44,9 +44,8 @@ export default function Register() {
                 {/* Zone branding */}
                 <View style={styles.brandingBlock}>
                     <View style={styles.logoCircle}>
-                        <Text style={styles.logoText}>MP</Text>
+                        <Image style={styles.img} source={require('../../assets/images/bg.png')} />
                     </View>
-                    <Text style={styles.appName}>mon-plat</Text>
                     <Text style={styles.tagline}>La food de chez nous, livrée chez toi</Text>
                 </View>
 
@@ -145,6 +144,11 @@ const styles = StyleSheet.create({
     brandingBlock: {
         alignItems: 'center',
         marginBottom: 32,
+    },
+
+    img:{
+        width: 35,
+        height: 35
     },
 
     logoCircle: {

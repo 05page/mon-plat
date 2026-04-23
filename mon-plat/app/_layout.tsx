@@ -2,14 +2,13 @@ import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
-import * as SplashScreen from 'expo-splash-screen'
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { useEffect, useState } from 'react';
 import AppSplashScreen from '@/components/splash-screen';
 import { PaperProvider, MD3LightTheme, MD3DarkTheme } from 'react-native-paper'
 import Toast from 'react-native-toast-message';
 import { Colors } from '@/constants/theme';
-
+import CartProvider from '@/context/CartContext';
 // Thèmes Paper custom — injecte nos couleurs dans le système MD3
 const paperLightTheme = {
   ...MD3LightTheme,
@@ -40,7 +39,7 @@ const paperDarkTheme = {
 //   fade: true
 // })
 export const unstable_settings = {
-  anchor: '(auth)',
+  anchor: '(foods)',
 };
 
 export default function RootLayout() {
@@ -53,17 +52,19 @@ export default function RootLayout() {
     }, 2500)
   }, [])
   if (showSplash) return <AppSplashScreen />
-  
+
   return (
-    <PaperProvider theme={colorScheme === 'dark' ? paperDarkTheme : paperLightTheme}>
-      <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
-      </Stack>
-      <StatusBar style="auto" />
-    </ThemeProvider>
-    <Toast />
-    </PaperProvider>
+    <CartProvider>
+      <PaperProvider theme={colorScheme === 'dark' ? paperDarkTheme : paperLightTheme}>
+        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+          <Stack>
+            <Stack.Screen name="(foods)/index" options={{ headerShown: false }} />
+            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+          </Stack>
+          <StatusBar style="auto" />
+        </ThemeProvider>
+        <Toast />
+      </PaperProvider>
+    </CartProvider>
   );
 }

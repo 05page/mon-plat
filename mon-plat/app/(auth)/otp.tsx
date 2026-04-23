@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { View, Text, StyleSheet } from 'react-native'
+import { View, Text, StyleSheet, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, TextInput } from 'react-native-paper'
 import Toast from 'react-native-toast-message'
@@ -37,7 +37,7 @@ export default function Otp() {
 
                 {/* Logo */}
                 <View style={styles.logoCircle}>
-                    <Text style={styles.logoText}>MP</Text>
+                    <Image style={styles.img} source={require('../../assets/images/bg.png')} />
                 </View>
 
                 {/* Texte explicatif */}
@@ -106,6 +106,11 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.35,
         shadowRadius: 10,
         elevation: 8,
+    },
+
+    img:{
+        width: 35,
+        height: 35
     },
 
     logoText: {

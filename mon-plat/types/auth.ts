@@ -16,3 +16,10 @@ export interface OtpCode{
     // email: string
     code_otp: number
 }
+
+export interface User{
+  fullname: string,
+  email: string,
+  role: string,
+  telephone: string
+}
