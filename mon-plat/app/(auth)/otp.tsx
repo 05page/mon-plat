@@ -4,8 +4,13 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, TextInput } from 'react-native-paper'
 import Toast from 'react-native-toast-message'
 import { OtpCode } from '@/types/auth'
+import { useRouter } from 'expo-router'
+import { useAppTheme } from '@/constants/theme'
 
 export default function Otp() {
+    const theme = useAppTheme()
+    const styles = createStyles(theme)
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [otp, setOtp] = useState<OtpCode>({ code_otp: 0 })
 
@@ -28,6 +33,7 @@ export default function Otp() {
         setIsLoading(true)
         setTimeout(() => {
             setIsLoading(false)
+            router.replace('/(foods)')
         }, 3000)
     }
 
@@ -49,7 +55,16 @@ export default function Otp() {
                 {/* Champ OTP */}
                 <TextInput
                     style={styles.input}
-                    theme={{ roundness: 16 }}
+                    theme={{
+                        roundness: 16,
+                        colors: {
+                            background: theme.colors.surface,
+                            onSurfaceVariant: theme.colors.muted,
+                            onSurface: theme.colors.text,
+                            outline: theme.colors.border,
+                            primary: theme.colors.primary,
+                        },
+                    }}
                     mode="outlined"
                     label="Code OTP"
                     value={otp.code_otp ? String(otp.code_otp) : ''}
@@ -60,7 +75,7 @@ export default function Otp() {
 
                 <Button
                     mode="contained"
-                    buttonColor="#FF6B00"
+                    buttonColor={theme.colors.primary}
                     style={styles.button}
                     loading={isLoading}
                     disabled={isLoading}
@@ -71,7 +86,7 @@ export default function Otp() {
 
                 {/* Lien pour renvoyer le code */}
                 <Text style={styles.resend}>
-                    Tu n'as pas reçu de code ?{' '}
+                    {"Tu n'as pas recu de code ? "}
                     <Text style={styles.resendLink}>Renvoyer</Text>
                 </Text>
 
@@ -80,10 +95,10 @@ export default function Otp() {
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
     safe: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
     },
 
     container: {
@@ -97,11 +112,11 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#FF6B00',
+        backgroundColor: theme.colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 32,
-        shadowColor: '#FF6B00',
+        shadowColor: theme.colors.primary,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.35,
         shadowRadius: 10,
@@ -123,14 +138,14 @@ const styles = StyleSheet.create({
     title: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#1a1a1a',
+        color: theme.colors.text,
         marginBottom: 12,
         textAlign: 'center',
     },
 
     subtitle: {
         fontSize: 14,
-        color: '#687076',
+        color: theme.colors.muted,
         textAlign: 'center',
         marginBottom: 32,
         lineHeight: 22,
@@ -151,11 +166,11 @@ const styles = StyleSheet.create({
     resend: {
         marginTop: 24,
         fontSize: 14,
-        color: '#687076',
+        color: theme.colors.muted,
     },
 
     resendLink: {
-        color: '#FF6B00',
+        color: theme.colors.primary,
         fontWeight: '600',
     },
 })

@@ -4,9 +4,13 @@ import { RegisterForm } from '@/types/auth'
 import { Button, TextInput, SegmentedButtons } from 'react-native-paper'
 import Toast from 'react-native-toast-message'
 import { SafeAreaView } from 'react-native-safe-area-context'
-import { Link } from 'expo-router'
+import { Link, useRouter } from 'expo-router'
+import { useAppTheme } from '@/constants/theme'
 
 export default function Register() {
+    const theme = useAppTheme()
+    const styles = createStyles(theme)
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [form, setForm] = useState<RegisterForm>({
         fullname: '',
@@ -34,6 +38,7 @@ export default function Register() {
         setIsLoading(true)
         setTimeout(() => {
             setIsLoading(false)
+            router.push('/(auth)/otp')
         }, 3000)
     }
 
@@ -54,7 +59,7 @@ export default function Register() {
 
                 <TextInput
                     style={styles.input}
-                    theme={{ roundness: 16 }}
+                    theme={inputTheme(theme)}
                     mode="outlined"
                     label="Nom complet"
                     value={form.fullname}
@@ -62,7 +67,7 @@ export default function Register() {
                 />
                 <TextInput
                     style={styles.input}
-                    theme={{ roundness: 16 }}
+                    theme={inputTheme(theme)}
                     mode="outlined"
                     label="Email"
                     value={form.email}
@@ -72,7 +77,7 @@ export default function Register() {
                 />
                 <TextInput
                     style={styles.input}
-                    theme={{ roundness: 16 }}
+                    theme={inputTheme(theme)}
                     mode="outlined"
                     label="Téléphone"
                     value={form.telephone}
@@ -81,7 +86,7 @@ export default function Register() {
                 />
                 <TextInput
                     style={styles.input}
-                    theme={{ roundness: 16 }}
+                    theme={inputTheme(theme)}
                     mode="outlined"
                     label="Mot de passe"
                     value={form.password}
@@ -90,7 +95,7 @@ export default function Register() {
                 />
                 <TextInput
                     style={styles.input}
-                    theme={{ roundness: 16 }}
+                    theme={inputTheme(theme)}
                     mode="outlined"
                     label="Confirmation mot de passe"
                     value={form.verify_password}
@@ -100,6 +105,14 @@ export default function Register() {
                 <SegmentedButtons
                     value={form.role}
                     onValueChange={(val) => handleChange('role', val)}
+                    theme={{
+                        colors: {
+                            secondaryContainer: theme.colors.surfaceAlt,
+                            onSecondaryContainer: theme.colors.text,
+                            outline: theme.colors.border,
+                            onSurface: theme.colors.text,
+                        },
+                    }}
                     buttons={[
                         { value: 'CLIENT', label: 'Client' },
                         { value: 'SELLER', label: 'Vendeur' },
@@ -109,11 +122,11 @@ export default function Register() {
                     loading={isLoading}
                     disabled={isLoading}
                     mode="contained"
-                    buttonColor="#FF6B00"
+                    buttonColor={theme.colors.primary}
                     style={styles.button}
                     onPress={handleSubmit}
                 >
-                    S'inscrire
+                    {"S'inscrire"}
                 </Button>
 
                 {/* Lien login */}
@@ -129,10 +142,21 @@ export default function Register() {
     )
 }
 
-const styles = StyleSheet.create({
+const inputTheme = (theme: ReturnType<typeof useAppTheme>) => ({
+    roundness: 16,
+    colors: {
+        background: theme.colors.surface,
+        onSurfaceVariant: theme.colors.muted,
+        onSurface: theme.colors.text,
+        outline: theme.colors.border,
+        primary: theme.colors.primary,
+    },
+})
+
+const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
     safe: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
     },
 
     container: {
@@ -155,11 +179,11 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#FF6B00',
+        backgroundColor: theme.colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 12,
-        shadowColor: '#FF6B00',
+        shadowColor: theme.colors.primary,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.35,
         shadowRadius: 10,
@@ -176,20 +200,20 @@ const styles = StyleSheet.create({
     appName: {
         fontSize: 26,
         fontWeight: 'bold',
-        color: '#1a1a1a',
+        color: theme.colors.text,
         marginBottom: 6,
     },
 
     tagline: {
         fontSize: 13,
-        color: '#687076',
+        color: theme.colors.muted,
         textAlign: 'center',
     },
 
     formTitle: {
         fontSize: 20,
         fontWeight: '600',
-        color: '#1a1a1a',
+        color: theme.colors.text,
         marginBottom: 20,
     },
 
@@ -210,12 +234,12 @@ const styles = StyleSheet.create({
     },
 
     footerText: {
-        color: '#687076',
+        color: theme.colors.muted,
         fontSize: 14,
     },
 
     footerLink: {
-        color: '#FF6B00',
+        color: theme.colors.primary,
         fontSize: 14,
         fontWeight: '600',
     },

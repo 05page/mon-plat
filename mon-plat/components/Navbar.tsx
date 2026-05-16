@@ -1,68 +1,83 @@
+import { useAppTheme } from '@/constants/theme'
 import { Ionicons } from '@expo/vector-icons'
-import { useRouter } from 'expo-router'
-import React, { useState } from 'react'
-import { StyleSheet, TouchableOpacity, View } from 'react-native'
+import { useRouter, useSegments } from 'expo-router'
+import React from 'react'
+import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 
 const NAV_ITEMS = [
-    { name: 'home-outline', active: 'home', route: '' },
-    { name: 'notifications-outline', active: 'notifications', route: '' },
-    { name: 'checkbox-outline', active: 'checkbox', route: '' },
-    { name: 'heart-outline', active: 'heart', route:'' },
-    { name: 'person-outline', active: 'person', route: '/(profile)' },
+    { label: 'Accueil', name: 'home-outline', active: 'home', route: '/(foods)', segment: '(foods)' },
+    { label: 'Panier', name: 'basket-outline', active: 'basket', route: '/basket', segment: 'basket' },
+    { label: 'Profil', name: 'person-outline', active: 'person', route: '/(profile)', segment: '(profile)' },
 ]
+
 export default function Navbar() {
+    const theme = useAppTheme()
+    const styles = createStyles(theme)
     const router = useRouter()
-    const [activeIndex, setActiveIndex] = useState(0)
+    const segments = useSegments()
+
     return (
         <View style={styles.content}>
-            {NAV_ITEMS.map((i, index) => (
-                <TouchableOpacity
-                    key={index}
-                    style={styles.navBtn}
-                    onPress={() => {
-                        setActiveIndex(index)
-                        router.push(i.route as any) // ✅ navigation ici
-                    }}
-                >
-                    {activeIndex === index && <View style={styles.indicator} />}
-                    <Ionicons
-                        name={activeIndex === index ? i.active : i.name}
-                        size={26}
-                        color={activeIndex === index ? '#FF6B00' : 'black'}
-                    />
-                </TouchableOpacity>
-            ))}
+            {NAV_ITEMS.map((item) => {
+                const isActive = segments.map(String).includes(item.segment)
+
+                return (
+                    <TouchableOpacity
+                        key={item.label}
+                        style={[styles.navBtn, isActive && styles.navBtnActive]}
+                        onPress={() => router.push(item.route as any)}
+                        activeOpacity={0.8}
+                    >
+                        <Ionicons
+                            name={(isActive ? item.active : item.name) as any}
+                            size={22}
+                            color={isActive ? theme.colors.primary : theme.colors.muted}
+                        />
+                        <Text style={[styles.label, isActive && styles.labelActive]}>{item.label}</Text>
+                    </TouchableOpacity>
+                )
+            })}
         </View>
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
     content: {
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        backgroundColor: "#fff",
-        height: 84,
-        borderRadius: 15,
-        paddingHorizontal: 10,
+        position: 'absolute',
+        left: 16,
+        right: 16,
+        bottom: 14,
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: theme.colors.surface,
+        height: 72,
+        borderRadius: theme.radius.lg,
+        paddingHorizontal: 8,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
         shadowColor: '#000',
-        shadowOffset: { width: 0, height: -2 },
-        shadowOpacity: 0.06,
-        shadowRadius: 8,
-        elevation: 10,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.08,
+        shadowRadius: 18,
+        elevation: 8,
     },
     navBtn: {
         alignItems: 'center',
         justifyContent: 'center',
         flex: 1,
-        height: '100%'
+        height: 54,
+        borderRadius: theme.radius.md,
+        gap: 3,
     },
-    indicator: {
-        position: 'absolute',
-        top: 0,
-        width: 30,
-        height: 3,
-        borderRadius: 2,
-        backgroundColor: '#FF6B00', // ← trait violet en haut
+    navBtnActive: {
+        backgroundColor: theme.colors.surfaceAlt,
+    },
+    label: {
+        fontSize: 11,
+        color: theme.colors.muted,
+        fontWeight: '600',
+    },
+    labelActive: {
+        color: theme.colors.primary,
     },
 })

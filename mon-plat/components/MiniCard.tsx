@@ -1,22 +1,29 @@
 import { Foods } from '@/types/foods'
+import { useAppTheme } from '@/constants/theme'
 import React from 'react'
-import { View, Text, Image, StyleSheet, TouchableOpacity, Button } from 'react-native';
+import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
 
-export default function miniCard({ title, type, content, price, image, quantie, authorId }: Foods) {
+export default function MiniCard({ title, type, price, image }: Foods) {
+    const theme = useAppTheme()
+    const styles = createStyles(theme)
+
     return (
-        <View>
+        <View style={styles.card}>
             <TouchableOpacity></TouchableOpacity>
             {image && (
-                <Image source={{ uri: image }} style={styles.imgWrapper} />
+                <View style={styles.imgWrapper}>
+                    <Image source={{ uri: image }} style={styles.img} />
+                </View>
             )}
 
-            <View>
-                <Text>{title}</Text>
-                <View>
-                    <Text>{price}</Text>
+            <View style={styles.content}>
+                <Text style={styles.type}>{type}</Text>
+                <Text style={styles.title} numberOfLines={2}>{title}</Text>
+                <View style={styles.contentBottom}>
+                    <Text style={styles.price}>{price.toLocaleString()} Fcfa</Text>
                     <TouchableOpacity
                         style={styles.addBtn}
-                        onPress={() => console.log('ajouté')}
+                        onPress={() => console.log('ajoute')}
                         activeOpacity={0.7}
                     >
                         <Text style={styles.addBtnText}>+</Text>
@@ -27,10 +34,15 @@ export default function miniCard({ title, type, content, price, image, quantie, 
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
     card: {
         width: 150,
-        height: 196,
+        minHeight: 196,
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.radius.lg,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        padding: 12,
         shadowColor: "#000000",
         shadowOffset: { width: 0, height: 4 },
         shadowOpacity: 0.08,
@@ -46,8 +58,7 @@ const styles = StyleSheet.create({
     },
     content: {
         width: "100%",
-        paddingHorizontal: 14,
-        marginTop: 12,
+        marginTop: 10,
     },
     contentBottom: {
         flexDirection: 'row',
@@ -55,17 +66,20 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
     },
     img: {
-        height: 60,
-        width: 60
+        height: '100%',
+        width: '100%',
     },
     title: {
-        fontSize: 10,
-        fontWeight: '400',
-        color: '#1a1a1a',
+        fontSize: 14,
+        fontWeight: '800',
+        color: theme.colors.text,
         marginBottom: 8,
     },
     type: {
-
+        color: theme.colors.primary,
+        fontSize: 10,
+        fontWeight: '800',
+        textTransform: 'uppercase',
     },
     description: {
 
@@ -76,24 +90,25 @@ const styles = StyleSheet.create({
         height: 100,
         borderRadius: 50,
         overflow: 'hidden',
+        alignSelf: 'center',
+        backgroundColor: theme.colors.surfaceAlt,
     },
     price: {
-        fontSize: 10,
-        fontWeight: '500',
-        color: '#b066cc'
+        fontSize: 12,
+        fontWeight: '800',
+        color: theme.colors.text,
     },
     addBtn: {
         width: 30,
         height: 30,
         borderRadius: 15,
-        borderWidth: 1.5,
-        borderColor: '#b066cc',
+        backgroundColor: theme.colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
     },
     addBtnText: {
         fontSize: 20,
-        color: '#b066cc',
+        color: '#fff',
         lineHeight: 24,
     }
 })

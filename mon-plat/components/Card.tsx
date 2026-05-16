@@ -1,122 +1,144 @@
-import { Foods } from '@/types/foods';
-import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity, FlatList } from 'react-native';
-import { useRouter } from 'expo-router';
-export default function Card({ title, type, price, image }: Foods) {
-    const [liked, setLiked] = useState(false);
+import { useAppTheme } from '@/constants/theme'
+import { useCart } from '@/context/CartContext'
+import { Foods } from '@/types/foods'
+import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import React, { useState } from 'react'
+import { Image, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+
+export default function Card(food: Foods) {
+    const theme = useAppTheme()
+    const styles = createStyles(theme)
+    const { title, type, price, image } = food
+    const [liked, setLiked] = useState(false)
     const router = useRouter()
+    const { addToCart } = useCart()
 
     return (
-        <View>
-            <TouchableOpacity  style={styles.card}
-                onPress={() => router.push({
+        <TouchableOpacity
+            style={styles.card}
+            activeOpacity={0.86}
+            onPress={() => router.push({
                 pathname: '/(foods)/[id]',
-                params: { id: title }
+                params: { id: title },
             })}
+        >
+            <TouchableOpacity
+                style={styles.heartBtn}
+                onPress={() => setLiked(!liked)}
+                activeOpacity={0.75}
             >
-                <TouchableOpacity style={styles.heartBtn} onPress={() => setLiked(!liked)}>
-                    <Ionicons name='heart' size={45} style={{ color: liked ? 'red' : '#ccc', fontSize: 18 }} />
-                </TouchableOpacity>
-
-                {image && (
-                    <View style={styles.imgWrapper}>
-                        <Image source={{ uri: image }} style={styles.img} />
-                    </View>
-                )}
-
-                <View style={styles.content}>
-                    <Text style={styles.title}>{title}</Text>
-                    <Text style={styles.type}>{type}</Text>
-
-                    <View style={styles.contentBottom}>
-                        <Text style={styles.price}>{price.toLocaleString()} Fcfa</Text>
-                        <TouchableOpacity style={styles.addBtn} activeOpacity={0.7}>
-                            <Text style={styles.addBtnText}>+</Text>
-                        </TouchableOpacity>
-                    </View>
-                </View>
+                <Ionicons
+                    name={liked ? 'heart' : 'heart-outline'}
+                    size={17}
+                    color={liked ? theme.colors.danger : theme.colors.muted}
+                />
             </TouchableOpacity>
-        </View>
+
+            {image && (
+                <View style={styles.imgWrapper}>
+                    <Image source={{ uri: image }} style={styles.img} />
+                </View>
+            )}
+
+            <View style={styles.content}>
+                <Text style={styles.type}>{type}</Text>
+                <Text style={styles.title} numberOfLines={2}>{title}</Text>
+
+                <View style={styles.contentBottom}>
+                    <Text style={styles.price}>{price.toLocaleString()} Fcfa</Text>
+                    <TouchableOpacity
+                        style={styles.addBtn}
+                        activeOpacity={0.8}
+                        onPress={() => {
+                            addToCart(food)
+                            router.push('/(foods)/basket')
+                        }}
+                    >
+                        <Ionicons name='add' size={18} color="#fff" />
+                    </TouchableOpacity>
+                </View>
+            </View>
+        </TouchableOpacity>
     )
 }
 
-const styles = StyleSheet.create({
-    list: {
-        padding: 16,
-        gap: 16,
-    },
-    row: {
-        gap: 16,
-        justifyContent: 'center',
-    },
+const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
     card: {
-        width: 150,
-        backgroundColor: '#fff',
-        borderRadius: 16,
-        paddingBottom: 12,
-        alignItems: 'center',
-        shadowColor: "#000000",
-        shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.08,
-        shadowRadius: 10,
-        elevation: 5
+        flex: 1,
+        minHeight: 222,
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.radius.lg,
+        padding: 14,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 6 },
+        shadowOpacity: 0.06,
+        shadowRadius: 14,
+        elevation: 4,
     },
     heartBtn: {
         position: 'absolute',
-        top: 10,
+        top: 12,
         right: 12,
-        zIndex: 1
-    },
-    content: {
-        width: "100%",
-        paddingHorizontal: 14,
-        marginTop: 12,
-    },
-    contentBottom: {
-        flexDirection: 'row',
+        zIndex: 1,
+        width: 32,
+        height: 32,
+        borderRadius: 16,
+        backgroundColor: theme.isDark ? '#2F2119E6' : '#FFFFFFE6',
         alignItems: 'center',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
+    },
+    imgWrapper: {
+        alignSelf: 'center',
+        width: 108,
+        height: 108,
+        borderRadius: 54,
+        overflow: 'hidden',
         marginTop: 8,
+        marginBottom: 14,
+        backgroundColor: theme.colors.surfaceAlt,
     },
     img: {
         width: '100%',
         height: '100%',
     },
-    imgWrapper: {
-        marginTop: 20,
-        width: 100,
-        height: 100,
-        borderRadius: 50,
-        overflow: 'hidden',
-    },
-    title: {
-        fontSize: 15,
-        fontWeight: '600',
-        color: '#1a1a1a',
-        marginBottom: 4,
+    content: {
+        flex: 1,
     },
     type: {
-        fontSize: 12,
-        color: '#999',
+        fontSize: 11,
+        color: theme.colors.primary,
+        fontWeight: '700',
+        textTransform: 'uppercase',
+    },
+    title: {
+        minHeight: 40,
+        fontSize: 16,
+        lineHeight: 20,
+        fontWeight: '800',
+        color: theme.colors.text,
+        marginTop: 4,
+    },
+    contentBottom: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 12,
     },
     price: {
+        flex: 1,
         fontSize: 13,
-        fontWeight: '700',
-        color: '#FF6B00'
+        fontWeight: '800',
+        color: theme.colors.text,
     },
     addBtn: {
-        width: 30,
-        height: 30,
-        borderRadius: 15,
-        borderWidth: 1.5,
-        borderColor: 'black',
+        width: 34,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: theme.colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    addBtnText: {
-        fontSize: 20,
-        color: 'black',
-        lineHeight: 24,
-    }
 })

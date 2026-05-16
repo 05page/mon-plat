@@ -2,11 +2,15 @@ import React, { useState } from 'react'
 import { View, Text, StyleSheet, Image } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, TextInput } from 'react-native-paper'
-import { Link } from 'expo-router'
+import { Link, useRouter } from 'expo-router'
 import Toast from 'react-native-toast-message'
 import { LoginForm } from '@/types/auth'
+import { useAppTheme } from '@/constants/theme'
 
 export default function Login() {
+    const theme = useAppTheme()
+    const styles = createStyles(theme)
+    const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [form, setForm] = useState<LoginForm>({
         email: '',
@@ -30,6 +34,7 @@ export default function Login() {
         setIsLoading(true)
         setTimeout(() => {
             setIsLoading(false)
+            router.replace('/(foods)')
         }, 3000)
     }
 
@@ -51,7 +56,16 @@ export default function Login() {
 
                     <TextInput
                         style={styles.input}
-                        theme={{ roundness: 16 }}
+                        theme={{
+                            roundness: 16,
+                            colors: {
+                                background: theme.colors.surface,
+                                onSurfaceVariant: theme.colors.muted,
+                                onSurface: theme.colors.text,
+                                outline: theme.colors.border,
+                                primary: theme.colors.primary,
+                            },
+                        }}
                         mode="outlined"
                         label="Email"
                         value={form.email}
@@ -61,7 +75,16 @@ export default function Login() {
                     />
                     <TextInput
                         style={styles.input}
-                        theme={{ roundness: 16 }}
+                        theme={{
+                            roundness: 16,
+                            colors: {
+                                background: theme.colors.surface,
+                                onSurfaceVariant: theme.colors.muted,
+                                onSurface: theme.colors.text,
+                                outline: theme.colors.border,
+                                primary: theme.colors.primary,
+                            },
+                        }}
                         mode="outlined"
                         label="Mot de passe"
                         value={form.password}
@@ -71,7 +94,7 @@ export default function Login() {
 
                     <Button
                         mode="contained"
-                        buttonColor="#FF6B00"
+                        buttonColor={theme.colors.primary}
                         style={styles.button}
                         loading={isLoading}
                         disabled={isLoading}
@@ -85,7 +108,7 @@ export default function Login() {
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Pas encore de compte ? </Text>
                     <Link href="/(auth)/register" style={styles.footerLink}>
-                        S'inscrire
+                        {"S'inscrire"}
                     </Link>
                 </View>
 
@@ -94,10 +117,10 @@ export default function Login() {
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
     safe: {
         flex: 1,
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.background,
     },
 
     container: {
@@ -120,12 +143,12 @@ const styles = StyleSheet.create({
         width: 80,
         height: 80,
         borderRadius: 40,
-        backgroundColor: '#FF6B00',
+        backgroundColor: theme.colors.primary,
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 12,
         // Ombre portée pour donner du relief au logo
-        shadowColor: '#FF6B00',
+        shadowColor: theme.colors.primary,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.35,
         shadowRadius: 10,
@@ -141,7 +164,7 @@ const styles = StyleSheet.create({
 
     tagline: {
         fontSize: 13,
-        color: '#687076',
+        color: theme.colors.muted,
         textAlign: 'center',
     },
 
@@ -152,7 +175,7 @@ const styles = StyleSheet.create({
     formTitle: {
         fontSize: 20,
         fontWeight: '600',
-        color: '#1a1a1a',
+        color: theme.colors.text,
         marginBottom: 20,
     },
 
@@ -173,12 +196,12 @@ const styles = StyleSheet.create({
     },
 
     footerText: {
-        color: '#687076',
+        color: theme.colors.muted,
         fontSize: 14,
     },
 
     footerLink: {
-        color: '#FF6B00',
+        color: theme.colors.primary,
         fontSize: 14,
         fontWeight: '600',
     },

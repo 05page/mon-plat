@@ -1,161 +1,198 @@
-import React, { useState } from 'react'
-import { StyleSheet, Text, TouchableOpacity, View, TextInput, ScrollView } from 'react-native'
-import { SafeAreaView } from 'react-native-safe-area-context'
-import { Foods } from '@/types/foods'
-import { User } from '@/types/auth'
-import { Ionicons } from '@expo/vector-icons';
-import { FlatList } from 'react-native';
 import Card from '@/components/Card'
-import { useRouter } from 'expo-router'
 import Navbar from '@/components/Navbar'
+import { useAppTheme } from '@/constants/theme'
+import { Foods } from '@/types/foods'
+import { Ionicons } from '@expo/vector-icons'
+import { useRouter } from 'expo-router'
+import React from 'react'
+import { FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const MOCK_FOODS: Foods[] = [
     {
-        title: "Honey lime combo",
-        type: "Salade",
-        content: "Une salade fraîche au miel et citron vert",
+        title: 'Honey lime combo',
+        type: 'Salade',
+        content: 'Une salade fraiche au miel et citron vert',
         price: 8000,
-        image: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400",
+        image: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=400',
         quantie: 10,
-        authorId: 1
+        authorId: 1,
     },
     {
-        title: "Burger Classic",
-        type: "Burger",
-        content: "Burger bœuf avec fromage et salade",
+        title: 'Burger Classic',
+        type: 'Burger',
+        content: 'Burger boeuf avec fromage et salade',
         price: 5500,
-        image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400",
+        image: 'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=400',
         quantie: 5,
-        authorId: 1
+        authorId: 1,
     },
     {
-        title: "Pizza Margherita",
-        type: "Pizza",
-        content: "Pizza tomate mozzarella basilic",
+        title: 'Pizza Margherita',
+        type: 'Pizza',
+        content: 'Pizza tomate mozzarella basilic',
         price: 7000,
-        image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
+        image: 'https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400',
         quantie: 8,
-        authorId: 2
+        authorId: 2,
     },
     {
-        title: "Pizza Margherita",
-        type: "Pizza",
-        content: "Pizza tomate mozzarella basilic",
-        price: 7000,
-        image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
-        quantie: 8,
-        authorId: 2
-    },
-    {
-        title: "Pizza Margherita",
-        type: "Pizza",
-        content: "Pizza tomate mozzarella basilic",
-        price: 7000,
-        image: "https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=400",
-        quantie: 8,
-        authorId: 2
+        title: 'Poulet braise',
+        type: 'Grillade',
+        content: 'Poulet marine, attieke et sauce oignon',
+        price: 6500,
+        image: 'https://images.unsplash.com/photo-1598515214211-89d3c73ae83b?w=400',
+        quantie: 7,
+        authorId: 2,
     },
 ]
-export default function foods() {
-    const [foods, setFoods] = useState<Foods>({
-        title: "",
-        type: "",
-        content: "",
-        price: 0,
-        image: "",
-        quantie: 0,
-        authorId: 0
-    })
-    const [user, setUser] = useState<User>({
-        fullname: "",
-        email: "",
-        telephone: "",
-        role: ""
-    })
+
+export default function FoodsScreen() {
+    const theme = useAppTheme()
+    const styles = createStyles(theme)
     const router = useRouter()
+
     return (
-        <SafeAreaView style={{ flex: 1 }}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity
-                    onPress={() => router.push('/basket')}>
-                    <Ionicons name='cart-outline' size={30} />
-                </TouchableOpacity>
-            </View>
-
-            {/* Description */}
-            <View style={styles.description}>
-                <Text style={styles.title}>Bonjour, {user.fullname}</Text>
-                <Text style={styles.subtitle}>Que voulez vous manger</Text>
-            </View>
-
-            {/* Search */}
-            <View style={styles.searchContainer}>
-                <TextInput style={styles.input} placeholder='Croissant' />
-                <Ionicons name='search' size={24} color="#3E4462" />
-                <TouchableOpacity>
-                    <Ionicons name='filter' size={24} color="#3E4462" />
-                </TouchableOpacity>
-            </View>
+        <SafeAreaView style={styles.safe}>
             <FlatList
                 data={MOCK_FOODS}
                 keyExtractor={(item, index) => item.title + index}
                 numColumns={2}
-                columnWrapperStyle={{ gap: 16, justifyContent: 'center' }}
-                contentContainerStyle={{ gap: 16, padding: 16 }}
+                columnWrapperStyle={styles.row}
+                contentContainerStyle={styles.list}
+                showsVerticalScrollIndicator={false}
                 renderItem={({ item }) => <Card {...item} />}
-
-                //Tout le contenu du haut va ici
                 ListHeaderComponent={
-                    <View>
-                        {/* Titre section */}
-                        <Text style={styles.text}>Recommandation</Text>
+                    <View style={styles.headerContent}>
+                        <View style={styles.topbar}>
+                            <View>
+                                <Text style={styles.eyebrow}>Mon Plat</Text>
+                                <Text style={styles.title}>Bonjour, Jean</Text>
+                            </View>
+                            <TouchableOpacity
+                                style={styles.cartBtn}
+                                onPress={() => router.push('/notification')}
+                                activeOpacity={0.8}
+                            >
+                                <Ionicons name='notifications-outline' size={22} color={theme.colors.text} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <Text style={styles.subtitle}>Que voulez-vous manger {"aujourd'hui"} ?</Text>
+
+                        <View style={styles.searchContainer}>
+                            <Ionicons name='search' size={20} color={theme.colors.muted} />
+                            <TextInput
+                                style={styles.input}
+                                placeholder='Rechercher un plat'
+                                placeholderTextColor={theme.colors.muted}
+                            />
+                            <TouchableOpacity style={styles.filterBtn} activeOpacity={0.75}>
+                                <Ionicons name='options-outline' size={20} color={theme.colors.primary} />
+                            </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.sectionHeader}>
+                            <Text style={styles.sectionTitle}>Recommandations</Text>
+                            <Text style={styles.sectionHint}>{MOCK_FOODS.length} plats</Text>
+                        </View>
                     </View>
                 }
             />
-            
             <Navbar />
         </SafeAreaView>
     )
 }
-const styles = StyleSheet.create({
-    header: {
-        alignItems: "flex-end",
-        justifyContent: "flex-end",
-        margin: 5,
+
+const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
+    safe: {
+        flex: 1,
+        backgroundColor: theme.colors.background,
     },
-    description: {
-        alignItems: "center",
-        justifyContent: "center",
+    list: {
+        padding: theme.spacing.screen,
+        paddingBottom: 110,
+        gap: 16,
+    },
+    row: {
+        gap: 14,
+    },
+    headerContent: {
+        gap: 18,
+        marginBottom: 2,
+    },
+    topbar: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+    },
+    eyebrow: {
+        color: theme.colors.primary,
+        fontSize: 13,
+        fontWeight: '800',
+        textTransform: 'uppercase',
     },
     title: {
-        fontSize: 25,
-        fontWeight: 800
+        fontSize: 30,
+        lineHeight: 36,
+        fontWeight: '900',
+        color: theme.colors.text,
+        marginTop: 2,
     },
     subtitle: {
-        fontSize: 15,
-        fontWeight: 400,
-        color: "#FF6B00"
+        fontSize: 17,
+        lineHeight: 24,
+        color: theme.colors.muted,
+        maxWidth: 260,
     },
-    content: {
-        margin: 5
-    },
-    text: {
-        fontSize: 24,
-        paddingTop: 5
-    },
-    input: {
-        flex: 1,              // prend tout l'espace disponible
-        height: 45,
+    cartBtn: {
+        width: 46,
+        height: 46,
+        borderRadius: 23,
+        backgroundColor: theme.colors.surface,
+        alignItems: 'center',
+        justifyContent: 'center',
         borderWidth: 1,
-        borderColor: 'black',
-        borderRadius: 10,
-        paddingHorizontal: 12,
+        borderColor: theme.colors.border,
     },
     searchContainer: {
-        flexDirection: 'row',   // ← les enfants s'alignent en ligne
+        height: 54,
+        flexDirection: 'row',
         alignItems: 'center',
+        backgroundColor: theme.colors.surface,
+        borderRadius: theme.radius.md,
         paddingHorizontal: 16,
-        gap: 10
-    }
+        gap: 10,
+        borderWidth: 1,
+        borderColor: theme.colors.border,
+    },
+    input: {
+        flex: 1,
+        color: theme.colors.text,
+        fontSize: 15,
+    },
+    filterBtn: {
+        width: 34,
+        height: 34,
+        borderRadius: 17,
+        backgroundColor: theme.colors.surfaceAlt,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    sectionHeader: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        marginTop: 4,
+    },
+    sectionTitle: {
+        fontSize: 20,
+        fontWeight: '900',
+        color: theme.colors.text,
+    },
+    sectionHint: {
+        fontSize: 13,
+        fontWeight: '700',
+        color: theme.colors.muted,
+    },
 })

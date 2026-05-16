@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons'
+import { useAppTheme } from '@/constants/theme'
 import React, { useState } from 'react'
 import {
     KeyboardAvoidingView, Modal, Platform,
@@ -13,6 +14,8 @@ type Props = {
 }
 
 export default function EditProfileModal({ visible, user, onClose, onSave }: Props) {
+    const theme = useAppTheme()
+    const styles = createStyles(theme)
     const [fullname, setFullname] = useState(user.fullname)
     const [email, setEmail] = useState(user.email)
     const [telephone, setTelephone] = useState(user.telephone)
@@ -28,7 +31,7 @@ export default function EditProfileModal({ visible, user, onClose, onSave }: Pro
                     <View style={styles.header}>
                         <Text style={styles.headerTitle}>Modifier le profil</Text>
                         <TouchableOpacity onPress={onClose}>
-                            <Ionicons name='close' size={24} color="#333" />
+                            <Ionicons name='close' size={24} color={theme.colors.text} />
                         </TouchableOpacity>
                     </View>
 
@@ -87,14 +90,14 @@ export default function EditProfileModal({ visible, user, onClose, onSave }: Pro
     )
 }
 
-const styles = StyleSheet.create({
+const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
     overlay: {
         flex: 1,
         backgroundColor: 'rgba(0,0,0,0.4)',
         justifyContent: 'flex-end',
     },
     sheet: {
-        backgroundColor: '#fff',
+        backgroundColor: theme.colors.surface,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 24,
@@ -105,19 +108,19 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         alignItems: 'center',
     },
-    headerTitle: { fontSize: 18, fontWeight: '700', color: '#1a1a1a' },
+    headerTitle: { fontSize: 18, fontWeight: '700', color: theme.colors.text },
     fields: { gap: 16 },
     field: { gap: 6 },
-    label: { fontSize: 13, color: '#888', fontWeight: '500' },
+    label: { fontSize: 13, color: theme.colors.muted, fontWeight: '500' },
     input: {
         borderWidth: 1,
-        borderColor: '#e0e0e0',
+        borderColor: theme.colors.border,
         borderRadius: 12,
         paddingHorizontal: 14,
         paddingVertical: 12,
         fontSize: 15,
-        color: '#1a1a1a',
-        backgroundColor: '#fafafa',
+        color: theme.colors.text,
+        backgroundColor: theme.colors.background,
     },
     actions: { flexDirection: 'row', gap: 12 },
     cancelBtn: {
@@ -125,15 +128,15 @@ const styles = StyleSheet.create({
         padding: 14,
         borderRadius: 25,
         borderWidth: 1.5,
-        borderColor: '#e0e0e0',
+        borderColor: theme.colors.border,
         alignItems: 'center',
     },
-    cancelText: { fontSize: 15, color: '#666', fontWeight: '600' },
+    cancelText: { fontSize: 15, color: theme.colors.muted, fontWeight: '600' },
     saveBtn: {
         flex: 1,
         padding: 14,
         borderRadius: 25,
-        backgroundColor: '#FF6B00',
+        backgroundColor: theme.colors.primary,
         alignItems: 'center',
     },
     saveText: { fontSize: 15, color: '#fff', fontWeight: '600' },
