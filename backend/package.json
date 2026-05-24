@@ -5,7 +5,7 @@
   "scripts": {
     "start": "tsx watch ./bin/www",
     "build": "tsc",
-    "postinstall": "npx tsc && npx prisma generate",
+    "postinstall": "./node_modules/.bin/tsc && npx prisma generate",
     "seed": "tsx prisma/seed.ts"
   },
   "prisma": {
@@ -40,6 +40,7 @@
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
     "prisma": "^7.5.0",
-    "tsx": "^4.21.0"
+    "tsx": "^4.21.0",
+    "typescript": "^5.0.0"
   }
 }
