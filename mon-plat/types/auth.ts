@@ -18,8 +18,10 @@ export interface OtpCode{
 }
 
 export interface User{
+  id: number;
+  token: string | null
   fullname: string,
   email: string,
-  role: string,
+  role: 'CLIENT' | 'SELLER',
   telephone: string
 }

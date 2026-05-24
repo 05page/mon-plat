@@ -17,7 +17,7 @@ export default function CartProvider({ children }: { children: React.ReactNode }
         setCart(prev => {
             const existing = prev.find(item => item.title === food.title)
             if (existing) {
-                // ✅ Article déjà dans le panier → augmente la quantité
+                //Article déjà dans le panier → augmente la quantité
                 return prev.map(item =>
                     item.title === food.title
                         ? { ...item, quantity: item.quantity + 1 }

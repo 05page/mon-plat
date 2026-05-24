@@ -9,6 +9,7 @@ import { PaperProvider, MD3LightTheme, MD3DarkTheme } from 'react-native-paper'
 import Toast from 'react-native-toast-message';
 import { Colors } from '@/constants/theme';
 import CartProvider from '@/context/CartContext';
+import AuthProvider from "@/context/AuthContext";
 // Thèmes Paper custom — injecte nos couleurs dans le système MD3
 const paperLightTheme = {
   ...MD3LightTheme,
@@ -54,20 +55,22 @@ export default function RootLayout() {
   if (showSplash) return <AppSplashScreen />
 
   return (
-    <CartProvider>
-      <PaperProvider theme={colorScheme === 'dark' ? paperDarkTheme : paperLightTheme}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-          <Stack>
-            <Stack.Screen name="(foods)/index" options={{ headerShown: false }} />
-            <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-            <Stack.Screen name="(wallet)" options={{ headerShown: false }} />
-            <Stack.Screen name="(orders)" options={{ headerShown: false }} />
-            <Stack.Screen name="notification" options={{ headerShown: false }} />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
-        <Toast />
-      </PaperProvider>
-    </CartProvider>
+    <AuthProvider>
+      <CartProvider>
+        <PaperProvider theme={colorScheme === 'dark' ? paperDarkTheme : paperLightTheme}>
+          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+            <Stack>
+              <Stack.Screen name="(foods)/index" options={{ headerShown: false }} />
+              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+              <Stack.Screen name="(wallet)" options={{ headerShown: false }} />
+              <Stack.Screen name="(orders)" options={{ headerShown: false }} />
+              <Stack.Screen name="notification" options={{ headerShown: false }} />
+            </Stack>
+            <StatusBar style="auto" />
+          </ThemeProvider>
+          <Toast />
+        </PaperProvider>
+      </CartProvider>
+    </AuthProvider>
   );
 }

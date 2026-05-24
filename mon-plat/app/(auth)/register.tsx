@@ -12,6 +12,8 @@ export default function Register() {
     const styles = createStyles(theme)
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
+    const [showPassword, setShowPassword] = useState(false)
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false)
     const [form, setForm] = useState<RegisterForm>({
         fullname: '',
         email: '',
@@ -27,14 +29,13 @@ export default function Register() {
 
     const handleSubmit = () => {
         if (!form.email || !form.fullname || !form.password || !form.role || !form.telephone || !form.verify_password) {
-            Toast.show({
-                type: 'error',
-                text1: 'Champs manquants',
-                text2: 'Tous les champs sont requis',
-            })
+            Toast.show({ type: 'error', text1: 'Champs manquants', text2: 'Tous les champs sont requis' })
             return
         }
-
+        if (form.password !== form.verify_password) {
+            Toast.show({ type: 'error', text1: 'Mots de passe', text2: 'Les mots de passe ne correspondent pas' })
+            return
+        }
         setIsLoading(true)
         setTimeout(() => {
             setIsLoading(false)
@@ -44,9 +45,9 @@ export default function Register() {
 
     return (
         <SafeAreaView style={styles.safe}>
-            <ScrollView contentContainerStyle={styles.container}>
+            <ScrollView contentContainerStyle={styles.container} showsVerticalScrollIndicator={false}>
 
-                {/* Zone branding */}
+                {/* Branding */}
                 <View style={styles.brandingBlock}>
                     <View style={styles.logoCircle}>
                         <Image style={styles.img} source={require('../../assets/images/bg.png')} />
@@ -54,8 +55,8 @@ export default function Register() {
                     <Text style={styles.tagline}>La food de chez nous, livrée chez toi</Text>
                 </View>
 
-                {/* Formulaire */}
                 <Text style={styles.formTitle}>Créer un compte</Text>
+                <Text style={styles.formSubtitle}>Rejoins la communauté mon-plat</Text>
 
                 <TextInput
                     style={styles.input}
@@ -63,6 +64,7 @@ export default function Register() {
                     mode="outlined"
                     label="Nom complet"
                     value={form.fullname}
+                    left={<TextInput.Icon icon="account-outline" color={theme.colors.muted} />}
                     onChangeText={(val) => handleChange('fullname', val)}
                 />
                 <TextInput
@@ -73,6 +75,7 @@ export default function Register() {
                     value={form.email}
                     keyboardType="email-address"
                     autoCapitalize="none"
+                    left={<TextInput.Icon icon="email-outline" color={theme.colors.muted} />}
                     onChangeText={(val) => handleChange('email', val)}
                 />
                 <TextInput
@@ -82,6 +85,7 @@ export default function Register() {
                     label="Téléphone"
                     value={form.telephone}
                     keyboardType="phone-pad"
+                    left={<TextInput.Icon icon="phone-outline" color={theme.colors.muted} />}
                     onChangeText={(val) => handleChange('telephone', val)}
                 />
                 <TextInput
@@ -90,51 +94,68 @@ export default function Register() {
                     mode="outlined"
                     label="Mot de passe"
                     value={form.password}
-                    secureTextEntry
+                    secureTextEntry={!showPassword}
+                    left={<TextInput.Icon icon="lock-outline" color={theme.colors.muted} />}
+                    right={
+                        <TextInput.Icon
+                            icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                            color={theme.colors.muted}
+                            onPress={() => setShowPassword(!showPassword)}
+                        />
+                    }
                     onChangeText={(val) => handleChange('password', val)}
                 />
                 <TextInput
                     style={styles.input}
                     theme={inputTheme(theme)}
                     mode="outlined"
-                    label="Confirmation mot de passe"
+                    label="Confirmer le mot de passe"
                     value={form.verify_password}
-                    secureTextEntry
+                    secureTextEntry={!showConfirmPassword}
+                    left={<TextInput.Icon icon="lock-check-outline" color={theme.colors.muted} />}
+                    right={
+                        <TextInput.Icon
+                            icon={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                            color={theme.colors.muted}
+                            onPress={() => setShowConfirmPassword(!showConfirmPassword)}
+                        />
+                    }
                     onChangeText={(val) => handleChange('verify_password', val)}
                 />
+
+                <Text style={styles.roleLabel}>Je suis</Text>
                 <SegmentedButtons
                     value={form.role}
                     onValueChange={(val) => handleChange('role', val)}
                     theme={{
                         colors: {
-                            secondaryContainer: theme.colors.surfaceAlt,
-                            onSecondaryContainer: theme.colors.text,
+                            secondaryContainer: theme.colors.primary,
+                            onSecondaryContainer: '#fff',
                             outline: theme.colors.border,
                             onSurface: theme.colors.text,
                         },
                     }}
                     buttons={[
-                        { value: 'CLIENT', label: 'Client' },
-                        { value: 'SELLER', label: 'Vendeur' },
+                        { value: 'CLIENT', label: 'Client', icon: 'account-outline' },
+                        { value: 'SELLER', label: 'Vendeur', icon: 'storefront-outline' },
                     ]}
                 />
+
                 <Button
                     loading={isLoading}
                     disabled={isLoading}
                     mode="contained"
                     buttonColor={theme.colors.primary}
                     style={styles.button}
+                    contentStyle={styles.buttonContent}
                     onPress={handleSubmit}
                 >
                     {"S'inscrire"}
                 </Button>
 
-                {/* Lien login */}
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Déjà un compte ? </Text>
-                    <Link href="/(auth)/login" style={styles.footerLink}>
-                        Se connecter
-                    </Link>
+                    <Link href="/(auth)/login" style={styles.footerLink}>Se connecter</Link>
                 </View>
 
             </ScrollView>
@@ -143,7 +164,7 @@ export default function Register() {
 }
 
 const inputTheme = (theme: ReturnType<typeof useAppTheme>) => ({
-    roundness: 16,
+    roundness: 14,
     colors: {
         background: theme.colors.surface,
         onSurfaceVariant: theme.colors.muted,
@@ -158,23 +179,19 @@ const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.creat
         flex: 1,
         backgroundColor: theme.colors.background,
     },
-
     container: {
         paddingHorizontal: 24,
         paddingVertical: 32,
         flexGrow: 1,
     },
-
     brandingBlock: {
         alignItems: 'center',
         marginBottom: 32,
     },
-
-    img:{
-        width: 35,
-        height: 35
+    img: {
+        width: 38,
+        height: 38,
     },
-
     logoCircle: {
         width: 80,
         height: 80,
@@ -189,58 +206,54 @@ const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.creat
         shadowRadius: 10,
         elevation: 8,
     },
-
-    logoText: {
-        color: '#fff',
-        fontSize: 28,
-        fontWeight: 'bold',
-        letterSpacing: 1,
-    },
-
-    appName: {
-        fontSize: 26,
-        fontWeight: 'bold',
-        color: theme.colors.text,
-        marginBottom: 6,
-    },
-
     tagline: {
         fontSize: 13,
         color: theme.colors.muted,
         textAlign: 'center',
     },
-
     formTitle: {
-        fontSize: 20,
-        fontWeight: '600',
+        fontSize: 28,
+        fontWeight: '900',
         color: theme.colors.text,
-        marginBottom: 20,
+        marginBottom: 4,
+        textAlign: "center"
     },
-
+    formSubtitle: {
+        fontSize: 14,
+        color: theme.colors.muted,
+        marginBottom: 24,
+        textAlign: "center"
+    },
     input: {
-        marginBottom: 16,
+        marginBottom: 14,
+        backgroundColor: theme.colors.surface,
     },
-
+    roleLabel: {
+        fontSize: 14,
+        fontWeight: '700',
+        color: theme.colors.text,
+        marginBottom: 10,
+        marginTop: 4,
+    },
     button: {
-        marginTop: 16,
+        marginTop: 20,
         borderRadius: 12,
-        paddingVertical: 4,
     },
-
+    buttonContent: {
+        paddingVertical: 6,
+    },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
         marginTop: 24,
     },
-
     footerText: {
         color: theme.colors.muted,
         fontSize: 14,
     },
-
     footerLink: {
         color: theme.colors.primary,
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '700',
     },
 })

@@ -4,18 +4,18 @@ import { SafeAreaView } from 'react-native-safe-area-context'
 import { Button, TextInput } from 'react-native-paper'
 import { Link, useRouter } from 'expo-router'
 import Toast from 'react-native-toast-message'
-import { LoginForm } from '@/types/auth'
+import { LoginForm, User } from '@/types/auth'
 import { useAppTheme } from '@/constants/theme'
+import { useAuth } from "@/context/AuthContext"
 
 export default function Login() {
     const theme = useAppTheme()
     const styles = createStyles(theme)
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
-    const [form, setForm] = useState<LoginForm>({
-        email: '',
-        password: '',
-    })
+    const { login } = useAuth();
+    const [showPassword, setShowPassword] = useState(false)
+    const [form, setForm] = useState<LoginForm>({ email: '', password: '' })
 
     const handleChange = (field: keyof LoginForm, value: string) => {
         setForm({ ...form, [field]: value })
@@ -23,26 +23,24 @@ export default function Login() {
 
     const handleSubmit = () => {
         if (!form.email || !form.password) {
-            Toast.show({
-                type: 'error',
-                text1: 'Champs manquants',
-                text2: 'Email et mot de passe requis',
-            })
+            Toast.show({ type: 'error', text1: 'Champs manquants', text2: 'Email et mot de passe requis' })
             return
         }
-
         setIsLoading(true)
-        setTimeout(() => {
-            setIsLoading(false)
+        const mockUser: User = { id: 1, fullname: 'Jean David', email: form.email, role: 'CLIENT', telephone: '0700000000', token: null }
+        login(mockUser, 'fake-token-123')
+        if (mockUser.role === 'SELLER') {
+            router.replace('/(seller)')
+        } else {
             router.replace('/(foods)')
-        }, 3000)
+        }
     }
 
     return (
         <SafeAreaView style={styles.safe}>
             <View style={styles.container}>
 
-                {/* Zone branding */}
+                {/* Branding */}
                 <View style={styles.brandingBlock}>
                     <View style={styles.logoCircle}>
                         <Image style={styles.img} source={require('../../assets/images/bg.png')} />
@@ -53,42 +51,34 @@ export default function Login() {
                 {/* Formulaire */}
                 <View style={styles.formBlock}>
                     <Text style={styles.formTitle}>Connexion</Text>
+                    <Text style={styles.formSubtitle}>Content de te revoir 👋</Text>
 
                     <TextInput
                         style={styles.input}
-                        theme={{
-                            roundness: 16,
-                            colors: {
-                                background: theme.colors.surface,
-                                onSurfaceVariant: theme.colors.muted,
-                                onSurface: theme.colors.text,
-                                outline: theme.colors.border,
-                                primary: theme.colors.primary,
-                            },
-                        }}
+                        theme={inputTheme(theme)}
                         mode="outlined"
                         label="Email"
                         value={form.email}
                         keyboardType="email-address"
                         autoCapitalize="none"
+                        left={<TextInput.Icon icon="email-outline" color={theme.colors.muted} />}
                         onChangeText={(val) => handleChange('email', val)}
                     />
                     <TextInput
                         style={styles.input}
-                        theme={{
-                            roundness: 16,
-                            colors: {
-                                background: theme.colors.surface,
-                                onSurfaceVariant: theme.colors.muted,
-                                onSurface: theme.colors.text,
-                                outline: theme.colors.border,
-                                primary: theme.colors.primary,
-                            },
-                        }}
+                        theme={inputTheme(theme)}
                         mode="outlined"
                         label="Mot de passe"
                         value={form.password}
-                        secureTextEntry
+                        secureTextEntry={!showPassword}
+                        left={<TextInput.Icon icon="lock-outline" color={theme.colors.muted} />}
+                        right={
+                            <TextInput.Icon
+                                icon={showPassword ? 'eye-off-outline' : 'eye-outline'}
+                                color={theme.colors.muted}
+                                onPress={() => setShowPassword(!showPassword)}
+                            />
+                        }
                         onChangeText={(val) => handleChange('password', val)}
                     />
 
@@ -96,6 +86,7 @@ export default function Login() {
                         mode="contained"
                         buttonColor={theme.colors.primary}
                         style={styles.button}
+                        contentStyle={styles.buttonContent}
                         loading={isLoading}
                         disabled={isLoading}
                         onPress={handleSubmit}
@@ -104,12 +95,9 @@ export default function Login() {
                     </Button>
                 </View>
 
-                {/* Lien register */}
                 <View style={styles.footer}>
                     <Text style={styles.footerText}>Pas encore de compte ? </Text>
-                    <Link href="/(auth)/register" style={styles.footerLink}>
-                        {"S'inscrire"}
-                    </Link>
+                    <Link href="/(auth)/register" style={styles.footerLink}>{"S'inscrire"}</Link>
                 </View>
 
             </View>
@@ -117,28 +105,35 @@ export default function Login() {
     )
 }
 
+const inputTheme = (theme: ReturnType<typeof useAppTheme>) => ({
+    roundness: 14,
+    colors: {
+        background: theme.colors.surface,
+        onSurfaceVariant: theme.colors.muted,
+        onSurface: theme.colors.text,
+        outline: theme.colors.border,
+        primary: theme.colors.primary,
+    },
+})
+
 const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.create({
     safe: {
         flex: 1,
         backgroundColor: theme.colors.background,
     },
-
     container: {
         flex: 1,
         paddingHorizontal: 24,
         justifyContent: 'center',
     },
-
-    img:{
-        width: 35,
-        height: 35
+    img: {
+        width: 38,
+        height: 38,
     },
-
     brandingBlock: {
         alignItems: 'center',
-        marginBottom: 48,
+        marginBottom: 44,
     },
-
     logoCircle: {
         width: 80,
         height: 80,
@@ -147,62 +142,56 @@ const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.creat
         alignItems: 'center',
         justifyContent: 'center',
         marginBottom: 12,
-        // Ombre portée pour donner du relief au logo
         shadowColor: theme.colors.primary,
         shadowOffset: { width: 0, height: 6 },
         shadowOpacity: 0.35,
         shadowRadius: 10,
         elevation: 8,
     },
-
-    logoText: {
-        color: '#fff',
-        fontSize: 28,
-        fontWeight: 'bold',
-        letterSpacing: 1,
-    },
-
     tagline: {
         fontSize: 13,
         color: theme.colors.muted,
         textAlign: 'center',
     },
-
     formBlock: {
         marginBottom: 24,
     },
-
     formTitle: {
-        fontSize: 20,
-        fontWeight: '600',
+        fontSize: 28,
+        fontWeight: '900',
         color: theme.colors.text,
-        marginBottom: 20,
+        textAlign: "center",
+        marginBottom: 4,
     },
-
+    formSubtitle: {
+        fontSize: 14,
+        color: theme.colors.muted,
+        marginBottom: 24,
+        textAlign: "center"
+    },
     input: {
-        marginBottom: 16,
+        marginBottom: 14,
+        backgroundColor: theme.colors.surface,
     },
-
     button: {
         marginTop: 8,
         borderRadius: 12,
-        paddingVertical: 4,
     },
-
+    buttonContent: {
+        paddingVertical: 6,
+    },
     footer: {
         flexDirection: 'row',
         justifyContent: 'center',
         marginTop: 16,
     },
-
     footerText: {
         color: theme.colors.muted,
         fontSize: 14,
     },
-
     footerLink: {
         color: theme.colors.primary,
         fontSize: 14,
-        fontWeight: '600',
+        fontWeight: '700',
     },
 })
