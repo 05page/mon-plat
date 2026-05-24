@@ -5,6 +5,7 @@
   "scripts": {
     "start": "tsx watch ./bin/www",
     "build": "tsc",
+    "postinstall": "npx tsc && npx prisma generate",
     "seed": "tsx prisma/seed.ts"
   },
   "prisma": {
