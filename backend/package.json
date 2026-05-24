@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "start": "tsx watch ./bin/www",
+    "build": "tsc",
     "seed": "tsx prisma/seed.ts"
   },
   "prisma": {
@@ -39,13 +40,5 @@
     "@types/swagger-ui-express": "^4.1.8",
     "prisma": "^7.5.0",
     "tsx": "^4.21.0"
-  },
-  "pnpm": {
-    "onlyBuiltDependencies": [
-      "@prisma/engines",
-      "prisma",
-      "bcrypt",
-      "esbuild"
-    ]
   }
 }
