@@ -6,6 +6,7 @@ import Toast from 'react-native-toast-message'
 import { SafeAreaView } from 'react-native-safe-area-context'
 import { Link, useRouter } from 'expo-router'
 import { useAppTheme } from '@/constants/theme'
+import { API_URL } from '@/constants/api'
 
 export default function Register() {
     const theme = useAppTheme()
@@ -27,7 +28,7 @@ export default function Register() {
         setForm({ ...form, [field]: value })
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!form.email || !form.fullname || !form.password || !form.role || !form.telephone || !form.verify_password) {
             Toast.show({ type: 'error', text1: 'Champs manquants', text2: 'Tous les champs sont requis' })
             return
@@ -36,11 +37,34 @@ export default function Register() {
             Toast.show({ type: 'error', text1: 'Mots de passe', text2: 'Les mots de passe ne correspondent pas' })
             return
         }
+
         setIsLoading(true)
-        setTimeout(() => {
-            setIsLoading(false)
+        try {
+            const response = await fetch(`${API_URL}/auth/register`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fullname: form.fullname,
+                    email: form.email,
+                    telephone: form.telephone,
+                    password: form.password,
+                    role: form.role,
+                }),
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                Toast.show({ type: 'error', text1: 'Erreur', text2: data.message || 'Inscription échouée' })
+                return
+            }
             router.push('/(auth)/otp')
-        }, 3000)
+
+        } catch (error) {
+            Toast.show({ type: 'error', text1: 'Erreur réseau', text2: 'Vérifie ta connexion' })
+        } finally {
+            setIsLoading(false)
+        }
     }
 
     return (

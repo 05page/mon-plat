@@ -19,9 +19,16 @@ export interface OtpCode{
 
 export interface User{
   id: number;
+  avatar: string | null;
   token: string | null
   fullname: string,
   email: string,
   role: 'CLIENT' | 'SELLER',
   telephone: string
+}
+
+/** Données acceptées par PUT /updateProfil */
+export interface EditProfile {
+  email: string;
+  fullname: string;
 }

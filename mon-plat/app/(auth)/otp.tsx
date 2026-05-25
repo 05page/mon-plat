@@ -5,6 +5,7 @@ import { Button } from 'react-native-paper'
 import Toast from 'react-native-toast-message'
 import { useRouter } from 'expo-router'
 import { useAppTheme } from '@/constants/theme'
+import { API_URL } from "@/constants/api"
 
 const OTP_LENGTH = 6
 
@@ -48,17 +49,31 @@ export default function Otp() {
         }
     }
 
-    const handleSubmit = () => {
-        const code = digits.join('')
-        if (code.length < OTP_LENGTH) {
-            Toast.show({ type: 'error', text1: 'Code incomplet', text2: `Saisis les ${OTP_LENGTH} chiffres` })
-            return
-        }
+    const handleSubmit = async () => {
+        const otp = digits.join('') // Assemble les 6 chiffres en une chaîne
         setIsLoading(true)
-        setTimeout(() => {
+        try {
+            const response = await fetch(`${API_URL}/auth/verify-email`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code_otp: otp }),
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                Toast.show({ type: 'error', text1: 'Erreur', text2: data.error || 'Code OTP non valide' })
+                return
+            }
+
+            Toast.show({ type: 'success', text1: 'Compte activé', text2: 'Tu peux maintenant te connecter' })
+            router.push('/(auth)/login')
+
+        } catch (error) {
+            Toast.show({ type: 'error', text1: 'Erreur réseau', text2: 'Vérifie ta connexion' })
+        } finally {
             setIsLoading(false)
-            router.replace('/(foods)')
-        }, 3000)
+        }
     }
 
     return (

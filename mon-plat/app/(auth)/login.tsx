@@ -7,6 +7,7 @@ import Toast from 'react-native-toast-message'
 import { LoginForm, User } from '@/types/auth'
 import { useAppTheme } from '@/constants/theme'
 import { useAuth } from "@/context/AuthContext"
+import { API_URL } from "@/constants/api"
 
 export default function Login() {
     const theme = useAppTheme()
@@ -21,18 +22,38 @@ export default function Login() {
         setForm({ ...form, [field]: value })
     }
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!form.email || !form.password) {
             Toast.show({ type: 'error', text1: 'Champs manquants', text2: 'Email et mot de passe requis' })
             return
         }
         setIsLoading(true)
-        const mockUser: User = { id: 1, fullname: 'Jean David', email: form.email, role: 'CLIENT', telephone: '0700000000', token: null }
-        login(mockUser, 'fake-token-123')
-        if (mockUser.role === 'SELLER') {
-            router.replace('/(seller)')
-        } else {
-            router.replace('/(foods)')
+        try {
+            const response = await fetch(`${API_URL}/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: form.email,
+                    password: form.password,
+                }),
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                Toast.show({ type: 'error', text1: 'Erreur', text2: data.message || 'Connexion échouée' })
+                return
+            }
+
+            // Connexion réussie → sauvegarder le token et rediriger
+            login(data.token)
+            Toast.show({ type: 'success', text1: 'Bienvenue', text2: 'Connexion réussie' })
+            router.push('/(foods)')
+
+        } catch (error) {
+            Toast.show({ type: 'error', text1: 'Erreur réseau', text2: 'Vérifie ta connexion' })
+        } finally {
+            setIsLoading(false)
         }
     }
 

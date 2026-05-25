@@ -1,5 +1,5 @@
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
-import { Stack } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import 'react-native-reanimated';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -9,7 +9,7 @@ import { PaperProvider, MD3LightTheme, MD3DarkTheme } from 'react-native-paper'
 import Toast from 'react-native-toast-message';
 import { Colors } from '@/constants/theme';
 import CartProvider from '@/context/CartContext';
-import AuthProvider from "@/context/AuthContext";
+import AuthProvider, { useAuth } from "@/context/AuthContext";
 // Thèmes Paper custom — injecte nos couleurs dans le système MD3
 const paperLightTheme = {
   ...MD3LightTheme,
@@ -43,6 +43,17 @@ export const unstable_settings = {
   anchor: '(foods)',
 };
 
+// Vérifie si le user est connecté — redirige vers login sinon
+function AuthGuard({ children }: { children: React.ReactNode }) {
+  const { token } = useAuth()
+
+  useEffect(() => {
+    if (!token) router.replace('/(auth)/login')
+  }, [token])
+
+  return <>{children}</>
+}
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const [showSplash, setShowSplash] = useState(true)
@@ -52,25 +63,28 @@ export default function RootLayout() {
       setShowSplash(false)
     }, 2500)
   }, [])
+
   if (showSplash) return <AppSplashScreen />
 
   return (
     <AuthProvider>
-      <CartProvider>
-        <PaperProvider theme={colorScheme === 'dark' ? paperDarkTheme : paperLightTheme}>
-          <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-            <Stack>
-              <Stack.Screen name="(foods)/index" options={{ headerShown: false }} />
-              <Stack.Screen name="(auth)" options={{ headerShown: false }} />
-              <Stack.Screen name="(wallet)" options={{ headerShown: false }} />
-              <Stack.Screen name="(orders)" options={{ headerShown: false }} />
-              <Stack.Screen name="notification" options={{ headerShown: false }} />
-            </Stack>
-            <StatusBar style="auto" />
-          </ThemeProvider>
-          <Toast />
-        </PaperProvider>
-      </CartProvider>
+      <AuthGuard>
+        <CartProvider>
+          <PaperProvider theme={colorScheme === 'dark' ? paperDarkTheme : paperLightTheme}>
+            <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+              <Stack>
+                <Stack.Screen name="(foods)/index" options={{ headerShown: false }} />
+                <Stack.Screen name="(auth)" options={{ headerShown: false }} />
+                <Stack.Screen name="(wallet)" options={{ headerShown: false }} />
+                <Stack.Screen name="(orders)" options={{ headerShown: false }} />
+                <Stack.Screen name="notification" options={{ headerShown: false }} />
+              </Stack>
+              <StatusBar style="auto" />
+            </ThemeProvider>
+            <Toast />
+          </PaperProvider>
+        </CartProvider>
+      </AuthGuard>
     </AuthProvider>
   );
 }

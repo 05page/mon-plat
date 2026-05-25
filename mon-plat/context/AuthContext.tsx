@@ -4,8 +4,8 @@ import { User } from '@/types/auth'
 type AuthContextType = {
     user: User | null
     token: string | null
-    /** Appelé après login réussi : stocke le user et son JWT */
-    login: (user: User, token: string) => void
+    /** Appelé après login réussi : stocke le JWT */
+    login: (token: string) => void
     /** Vide le user et le token (déconnexion) */
     logout: () => void
 }
@@ -16,8 +16,7 @@ export default function AuthProvider({ children }: { children: React.ReactNode }
     const [user, setUser] = useState<User | null>(null)
     const [token, setToken] = useState<string | null>(null)
 
-    const login = (user: User, token: string) => {
-        setUser(user)
+    const login = (token: string) => {
         setToken(token)
     }
 
