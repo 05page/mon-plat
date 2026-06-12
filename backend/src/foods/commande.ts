@@ -52,7 +52,7 @@ router.get('/mes-commandes', authMiddleware, async (req: AuthRequest, res: Respo
     }
 })
 
-router.get('/orders/sales', [authMiddleware, RoleMiddleware], async (req: AuthRequest, res: Response) => {
+router.get('/sales', [authMiddleware, RoleMiddleware], async (req: AuthRequest, res: Response) => {
     try {
 
         const sales = await prisma.orderItem.findMany({
@@ -101,7 +101,7 @@ router.get('/orders/sales', [authMiddleware, RoleMiddleware], async (req: AuthRe
     }
 })
 
-router.get('/orders/stats', [authMiddleware, RoleMiddleware], async (req: AuthRequest, res: Response) => {
+router.get('/stats', [authMiddleware, RoleMiddleware], async (req: AuthRequest, res: Response) => {
     try {
 
         // Calcule le nombre de ventes et le total des revenus
