@@ -1,9 +1,12 @@
 import { useAppTheme } from '@/constants/theme'
+import { useAuth } from '@/context/AuthContext'
+import { API_URL } from '@/constants/api'
 import { Ionicons } from '@expo/vector-icons'
 import { Stack, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import Toast from 'react-native-toast-message'
 
 // Montants rapides prédéfinis
 const QUICK_AMOUNTS = [5000, 10000, 25000, 50000]
@@ -12,11 +15,38 @@ export default function RechargeWallet() {
     const theme = useAppTheme()
     const styles = createStyles(theme)
     const router = useRouter()
+    const { token } = useAuth()
     const [amount, setAmount] = useState('')
     const [pin, setPin] = useState('')
     const [pinVisible, setPinVisible] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
     const isValid = Number(amount) > 0 && pin.length === 4
+
+    const handleRecharge = async () => {
+        setIsLoading(true)
+        try {
+            const response = await fetch(`${API_URL}/wallet/recharge-wallet`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ amount: Number(amount), pin })
+            })
+            const data = await response.json()
+            if (!response.ok) {
+                Toast.show({ type: 'error', text1: 'Erreur', text2: data.error || 'Recharge échouée' })
+                return
+            }
+            Toast.show({ type: 'success', text1: 'Recharge effectuée !', text2: `${Number(amount).toLocaleString()} Fcfa ajoutés` })
+            router.back()
+        } catch (error) {
+            Toast.show({ type: 'error', text1: 'Erreur réseau', text2: 'Vérifie ta connexion' })
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -102,15 +132,14 @@ export default function RechargeWallet() {
 
                     {/* Bouton confirmer */}
                     <TouchableOpacity
-                        style={[styles.confirmBtn, !isValid && styles.confirmBtnDisabled]}
+                        style={[styles.confirmBtn, (!isValid || isLoading) && styles.confirmBtnDisabled]}
                         activeOpacity={0.85}
-                        disabled={!isValid}
-                        onPress={() => {
-                            // TODO: POST /recharge-wallet { amount, pin }
-                            console.log('Recharge :', { amount: Number(amount), pin })
-                        }}
+                        disabled={!isValid || isLoading}
+                        onPress={handleRecharge}
                     >
-                        <Text style={styles.confirmText}>Confirmer la recharge</Text>
+                        <Text style={styles.confirmText}>
+                            {isLoading ? 'Recharge en cours…' : 'Confirmer la recharge'}
+                        </Text>
                     </TouchableOpacity>
 
                 </ScrollView>

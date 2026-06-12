@@ -1,21 +1,51 @@
 import { useAppTheme } from '@/constants/theme'
+import { useAuth } from '@/context/AuthContext'
+import { API_URL } from '@/constants/api'
 import { Ionicons } from '@expo/vector-icons'
 import { Stack, useRouter } from 'expo-router'
 import { useState } from 'react'
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
+import Toast from 'react-native-toast-message'
 
 export default function CreateWallet() {
     const theme = useAppTheme()
     const styles = createStyles(theme)
     const router = useRouter()
+    const { token } = useAuth()
     const [pin, setPin] = useState('')
     const [confirmPin, setConfirmPin] = useState('')
     const [pinVisible, setPinVisible] = useState(false)
     const [confirmPinVisible, setConfirmPinVisible] = useState(false)
+    const [isLoading, setIsLoading] = useState(false)
 
     const pinsMatch = pin === confirmPin && confirmPin.length === 4
     const isValid = pin.length === 4 && pinsMatch
+
+    const handleCreate = async () => {
+        setIsLoading(true)
+        try {
+            const response = await fetch(`${API_URL}/wallet/create-wallet`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ pin, confirmPin })
+            })
+            const data = await response.json()
+            if (!response.ok) {
+                Toast.show({ type: 'error', text1: 'Erreur', text2: data.error || 'Impossible de créer le wallet' })
+                return
+            }
+            Toast.show({ type: 'success', text1: 'Wallet créé !', text2: 'Votre wallet est prêt' })
+            router.replace('/(wallet)')
+        } catch (error) {
+            Toast.show({ type: 'error', text1: 'Erreur réseau', text2: 'Vérifie ta connexion' })
+        } finally {
+            setIsLoading(false)
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -100,15 +130,14 @@ export default function CreateWallet() {
 
                     {/* Bouton créer */}
                     <TouchableOpacity
-                        style={[styles.confirmBtn, !isValid && styles.confirmBtnDisabled]}
+                        style={[styles.confirmBtn, (!isValid || isLoading) && styles.confirmBtnDisabled]}
                         activeOpacity={0.85}
-                        disabled={!isValid}
-                        onPress={() => {
-                            // TODO: POST /create-wallet { pin, confirmPin }
-                            console.log('Création wallet avec PIN :', pin)
-                        }}
+                        disabled={!isValid || isLoading}
+                        onPress={handleCreate}
                     >
-                        <Text style={styles.confirmText}>Créer mon wallet</Text>
+                        <Text style={styles.confirmText}>
+                            {isLoading ? 'Création en cours…' : 'Créer mon wallet'}
+                        </Text>
                     </TouchableOpacity>
 
                 </ScrollView>

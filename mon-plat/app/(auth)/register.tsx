@@ -46,16 +46,18 @@ export default function Register() {
                 body: JSON.stringify({
                     fullname: form.fullname,
                     email: form.email,
-                    telephone: form.telephone,
+                    telephone: form.telephone.trim(),
                     password: form.password,
+                    verify_password: form.verify_password,
                     role: form.role,
                 }),
             })
 
             const data = await response.json()
 
+            console.log(data)
             if (!response.ok) {
-                Toast.show({ type: 'error', text1: 'Erreur', text2: data.message || 'Inscription échouée' })
+                Toast.show({ type: 'error', text1: 'Erreur', text2: data.error || 'Inscription échouée' })
                 return
             }
             router.push('/(auth)/otp')

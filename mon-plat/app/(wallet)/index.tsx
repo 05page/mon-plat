@@ -1,23 +1,15 @@
 import { useAppTheme } from '@/constants/theme'
+import { useAuth } from '@/context/AuthContext'
+import { API_URL } from '@/constants/api'
+import RefreshComponent from '@/components/refresh'
+import LoadingComponent from '@/components/Loading'
 import { Ionicons } from '@expo/vector-icons'
 import { Stack, useRouter } from 'expo-router'
-import { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native'
 import { SafeAreaView } from 'react-native-safe-area-context'
 
-// Passer à true pour simuler un wallet existant — à remplacer par GET /my-wallet
-const MOCK_HAS_WALLET = false
-
-const MOCK_BALANCE = 45000
-
-const MOCK_TRANSACTIONS = [
-    { id: 1, type: 'DEBIT', amount: 8500, createdAt: '2026-05-15T10:30:00Z' },
-    { id: 2, type: 'CREDIT', amount: 20000, createdAt: '2026-05-14T08:00:00Z' },
-    { id: 3, type: 'DEBIT', amount: 6500, createdAt: '2026-05-13T19:45:00Z' },
-    { id: 4, type: 'CREDIT', amount: 50000, createdAt: '2026-05-12T11:00:00Z' },
-    { id: 5, type: 'DEBIT', amount: 9500, createdAt: '2026-05-10T14:20:00Z' },
-]
-
+// Formate une date ISO en date lisible en français
 function formatDate(iso: string) {
     const d = new Date(iso)
     return d.toLocaleDateString('fr-FR', { day: '2-digit', month: 'short', year: 'numeric' })
@@ -27,7 +19,54 @@ export default function Wallet() {
     const theme = useAppTheme()
     const styles = createStyles(theme)
     const router = useRouter()
-    const [hasWallet] = useState(MOCK_HAS_WALLET)
+    const { token } = useAuth()
+
+    const [hasWallet, setHasWallet] = useState(false)
+    const [balance, setBalance] = useState(0)
+    const [transactions, setTransactions] = useState<any[]>([])
+    const [loading, setLoading] = useState(false)
+
+    useEffect(() => {
+        handleGetWallet()
+    }, [])
+
+    // Charge le wallet du user connecté puis ses transactions si le wallet existe
+    // Stratégie : on enchaîne les deux appels dans la même fonction pour ne faire qu'un setLoading
+    const handleGetWallet = async () => {
+        setLoading(true)
+        try {
+            // 1. Vérifier si le wallet existe et récupérer le solde
+            // L'API retourne { balance: number } si OK, ou 404 si pas de wallet
+            const walletRes = await fetch(`${API_URL}/wallet/my-wallet`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+
+            if (!walletRes.ok) {
+                // 404 → pas de wallet créé
+                setHasWallet(false)
+                return  // on s'arrête ici, pas besoin de charger les transactions
+            }
+
+            const walletData = await walletRes.json()
+            setHasWallet(true)
+            setBalance(walletData.balance)
+
+            // 2. Charger l'historique des transactions (seulement si wallet existe)
+            const txRes = await fetch(`${API_URL}/wallet/transactions`, {
+                headers: { Authorization: `Bearer ${token}` }
+            })
+            const txData = await txRes.json()
+            // L'API retourne toujours un tableau ici
+            if (Array.isArray(txData)) {
+                setTransactions(txData)
+            }
+
+        } catch (error) {
+            console.error('Erreur wallet:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
 
     return (
         <SafeAreaView style={styles.container}>
@@ -39,10 +78,14 @@ export default function Wallet() {
                     <Ionicons name='chevron-back' size={22} color={theme.colors.text} />
                 </TouchableOpacity>
                 <Text style={styles.title}>Mon Wallet</Text>
+                <RefreshComponent onRefresh={handleGetWallet} />
             </View>
 
-            {/* Vue : pas de wallet */}
-            {!hasWallet && (
+            {/* Spinner pendant le chargement */}
+            {loading && <LoadingComponent />}
+
+            {/* Vue : pas de wallet (et chargement terminé) */}
+            {!loading && !hasWallet && (
                 <View style={styles.emptyWallet}>
                     <View style={styles.emptyIcon}>
                         <Ionicons name='wallet-outline' size={40} color={theme.colors.primary} />
@@ -62,68 +105,78 @@ export default function Wallet() {
                 </View>
             )}
 
-            {/* Vue : wallet existant */}
-            {hasWallet && <FlatList
-                data={MOCK_TRANSACTIONS}
-                keyExtractor={(item) => item.id.toString()}
-                contentContainerStyle={styles.list}
-                showsVerticalScrollIndicator={false}
+            {/* Vue : wallet existant (et chargement terminé) */}
+            {!loading && hasWallet && (
+                <FlatList
+                    data={transactions}
+                    keyExtractor={(item) => item.id.toString()}
+                    contentContainerStyle={styles.list}
+                    showsVerticalScrollIndicator={false}
 
-                /* Carte solde en haut de la liste */
-                ListHeaderComponent={
-                    <View>
-                        <View style={styles.balanceCard}>
-                            <Ionicons name='wallet-outline' size={28} color='#fff' />
-                            <Text style={styles.balanceLabel}>Solde disponible</Text>
-                            <Text style={styles.balanceValue}>{MOCK_BALANCE.toLocaleString()} Fcfa</Text>
+                    ListHeaderComponent={
+                        <View>
+                            {/* Carte solde */}
+                            <View style={styles.balanceCard}>
+                                <Ionicons name='wallet-outline' size={28} color='#fff' />
+                                <Text style={styles.balanceLabel}>Solde disponible</Text>
+                                <Text style={styles.balanceValue}>{balance.toLocaleString()} Fcfa</Text>
 
-                            {/* Bouton recharger */}
-                            <TouchableOpacity
-                                style={styles.rechargeBtn}
-                                activeOpacity={0.85}
-                                onPress={() => router.push('/(wallet)/recharge')}
-                            >
-                                <Ionicons name='add-circle-outline' size={18} color={theme.colors.primary} />
-                                <Text style={styles.rechargeBtnText}>Recharger</Text>
-                            </TouchableOpacity>
-                        </View>
-
-                        <Text style={styles.sectionTitle}>Historique</Text>
-                    </View>
-                }
-
-                renderItem={({ item }) => {
-                    const isDebit = item.type === 'DEBIT'
-                    return (
-                        <View style={styles.txRow}>
-                            {/* Icône selon le type */}
-                            <View style={[styles.txIcon, { backgroundColor: isDebit ? theme.isDark ? '#3A1F1F' : '#FFF1F1' : theme.isDark ? '#1A2F1F' : '#F0FFF4' }]}>
-                                <Ionicons
-                                    name={isDebit ? 'arrow-up-outline' : 'arrow-down-outline'}
-                                    size={20}
-                                    color={isDebit ? theme.colors.danger : theme.colors.success}
-                                />
+                                <TouchableOpacity
+                                    style={styles.rechargeBtn}
+                                    activeOpacity={0.85}
+                                    onPress={() => router.push('/(wallet)/recharge')}
+                                >
+                                    <Ionicons name='add-circle-outline' size={18} color={theme.colors.primary} />
+                                    <Text style={styles.rechargeBtnText}>Recharger</Text>
+                                </TouchableOpacity>
                             </View>
 
-                            <View style={styles.txInfo}>
-                                <Text style={styles.txType}>{isDebit ? 'Paiement' : 'Recharge'}</Text>
-                                <Text style={styles.txDate}>{formatDate(item.createdAt)}</Text>
-                            </View>
-
-                            <Text style={[styles.txAmount, { color: isDebit ? theme.colors.danger : theme.colors.success }]}>
-                                {isDebit ? '-' : '+'}{item.amount.toLocaleString()} F
-                            </Text>
+                            <Text style={styles.sectionTitle}>Historique</Text>
                         </View>
-                    )
-                }}
+                    }
 
-                ListEmptyComponent={
-                    <View style={styles.empty}>
-                        <Ionicons name='receipt-outline' size={34} color={theme.colors.muted} />
-                        <Text style={styles.emptyText}>Aucune transaction</Text>
-                    </View>
-                }
-            />}
+                    renderItem={({ item }) => {
+                        const isDebit = item.type === 'DEBIT'
+                        return (
+                            <View style={styles.txRow}>
+                                {/* Icône colorée selon le sens de la transaction */}
+                                <View style={[
+                                    styles.txIcon,
+                                    { backgroundColor: isDebit
+                                        ? (theme.isDark ? '#3A1F1F' : '#FFF1F1')
+                                        : (theme.isDark ? '#1A2F1F' : '#F0FFF4')
+                                    }
+                                ]}>
+                                    <Ionicons
+                                        name={isDebit ? 'arrow-up-outline' : 'arrow-down-outline'}
+                                        size={20}
+                                        color={isDebit ? theme.colors.danger : theme.colors.success}
+                                    />
+                                </View>
+
+                                <View style={styles.txInfo}>
+                                    <Text style={styles.txType}>{isDebit ? 'Paiement' : 'Recharge'}</Text>
+                                    <Text style={styles.txDate}>{formatDate(item.createdAt)}</Text>
+                                </View>
+
+                                <Text style={[
+                                    styles.txAmount,
+                                    { color: isDebit ? theme.colors.danger : theme.colors.success }
+                                ]}>
+                                    {isDebit ? '-' : '+'}{item.amount.toLocaleString()} F
+                                </Text>
+                            </View>
+                        )
+                    }}
+
+                    ListEmptyComponent={
+                        <View style={styles.empty}>
+                            <Ionicons name='receipt-outline' size={34} color={theme.colors.muted} />
+                            <Text style={styles.emptyText}>Aucune transaction</Text>
+                        </View>
+                    }
+                />
+            )}
         </SafeAreaView>
     )
 }
@@ -153,6 +206,7 @@ function createStyles(theme: ReturnType<typeof useAppTheme>) {
             borderColor: theme.colors.border,
         },
         title: {
+            flex: 1,
             fontSize: 26,
             fontWeight: '900',
             color: theme.colors.text,

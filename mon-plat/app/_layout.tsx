@@ -77,6 +77,7 @@ export default function RootLayout() {
                 <Stack.Screen name="(auth)" options={{ headerShown: false }} />
                 <Stack.Screen name="(wallet)" options={{ headerShown: false }} />
                 <Stack.Screen name="(orders)" options={{ headerShown: false }} />
+                <Stack.Screen name="(seller)" options={{ headerShown: false }} />
                 <Stack.Screen name="notification" options={{ headerShown: false }} />
               </Stack>
               <StatusBar style="auto" />

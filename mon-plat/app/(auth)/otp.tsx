@@ -14,6 +14,7 @@ export default function Otp() {
     const styles = createStyles(theme)
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
+    const [email, setEmail] = useState('')
     const [digits, setDigits] = useState<string[]>(Array(OTP_LENGTH).fill(''))
 
     // Une ref par case pour gérer le focus automatique
@@ -56,7 +57,7 @@ export default function Otp() {
             const response = await fetch(`${API_URL}/auth/verify-email`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ code_otp: otp }),
+                body: JSON.stringify({ email, code_otp: parseInt(otp) }),
             })
 
             const data = await response.json()
@@ -88,6 +89,16 @@ export default function Otp() {
                 <Text style={styles.subtitle}>
                     Entre le code à {OTP_LENGTH} chiffres reçu par email pour activer ton compte.
                 </Text>
+
+                {/* Champ email */}
+                <TextInput
+                    style={styles.emailInput}
+                    placeholder="Ton adresse email"
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    autoCapitalize="none"
+                />
 
                 {/* Cases OTP individuelles */}
                 <View style={styles.otpRow}>
@@ -210,6 +221,18 @@ const createStyles = (theme: ReturnType<typeof useAppTheme>) => StyleSheet.creat
     resendText: {
         fontSize: 14,
         color: theme.colors.muted,
+    },
+    emailInput: {
+        width: '100%',
+        borderWidth: 1.5,
+        borderColor: theme.colors.border,
+        borderRadius: 12,
+        paddingHorizontal: 16,
+        paddingVertical: 12,
+        fontSize: 15,
+        color: theme.colors.text,
+        backgroundColor: theme.colors.surface,
+        marginBottom: 24,
     },
     resendLink: {
         fontSize: 14,
