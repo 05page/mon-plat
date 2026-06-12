@@ -43,12 +43,30 @@ export const unstable_settings = {
   anchor: '(foods)',
 };
 
+function getRoleFromToken(token: string): string | null {
+  try {
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.role
+  } catch {
+    return null
+  }
+}
+
 // Vérifie si le user est connecté — redirige vers login sinon
 function AuthGuard({ children }: { children: React.ReactNode }) {
   const { token } = useAuth()
 
   useEffect(() => {
-    if (!token) router.replace('/(auth)/login')
+    if (!token) {
+      router.replace('/(auth)/login')
+      return
+    }
+  const role = getRoleFromToken(token)
+    if (role === "SELLER") {
+      router.replace('/(seller)')
+    } else {
+      router.replace('/(foods)')
+    }
   }, [token])
 
   return <>{children}</>
